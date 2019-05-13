@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.test.board.dao.IDao">
+	<select id="list" resultType="com.test.board.dto.QnADto">
+	select
+		q.qCode, 
+		qName, 
+		qEmail, 
+		qPhone, 
+		p.pdCode, 
+		p.pdName, 
+		qContents,
+		q.qRegistTime, 
+		a.aAnswer, 
+		s.stCode, 
+		s.stName, 
+		ad.emName, 
+		ad.emCode
+	from 
+		question q
+	left join
+		answer a
+		using (qCode)
+	join
+		product p
+	on 
+		q.pdCode = p.pdCode
+	join
+		state s
+	on 
+		q.stCode = s.stCode
+	left join
+		signUpAdmin ad
+	on 
+		a.emCode = ad.emCode
+	order by 
+		qRegistTime asc
+	</select>
+	
+	<insert id="regist">
+		insert into 
+			question(qName, qEmail, qPhone, pdCode, qContents) 
+		values(
+			#{param1}, #{param2}, #{param3}, #{param4}, #{param5}
+			)
+	</insert>
+	
+	<select id="qnaResponding" resultType="com.test.board.dto.QnADto">
+		select 
+			q.qCode, 
+			qName, 
+			qEmail, 
+			qPhone, 
+			p.pdCode, 
+			p.pdName, 
+			qContents, 
+			q.qRegistTime,  
+			s.stCode, 
+			s.stName,
+            a.aAnswer
+		from 
+			question q, 
+			product p, 
+			state s, 
+            answer a
+		where 
+			q.pdCode = p.pdCode 
+		and 
+			q.stCode = s.stCode 
+        and
+			q.qCode = a.qCode
+		and 
+			q.stCode = #{param1} 
+        and 
+			a.emCode = #{param2} 
+	</select>
+	
+	<select id="qnaResponding2" resultType="com.test.board.dto.QnADto">
+		select 
+			qCode, 
+			qName, 
+			qEmail, 
+			qPhone, 
+			p.pdCode, 
+			p.pdName, 
+			qContents, 
+			qRegistTime,  
+			s.stCode, 
+			s.stName 
+		from 
+			question q, 
+			product p, 
+			state s 
+		where 
+			q.pdCode = p.pdCode 
+		and 
+			q.stCode = s.stCode 
+		and 
+			q.stCode = #{param1} 
+	</select>
+	
+	<insert id="reply">
+		insert into answer(aAnswer, qCode, emCode) values(#{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<insert id="signUp">
+		insert into signUpAdmin(emName, emPw, emNum) values(#{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<select id="login" resultType="com.test.board.dto.Employee">
+		select emCode, emName, emPw, emNum from signUpAdmin where emNum = #{param1} and emPw = #{param2}
+	</select>
+
+	<update id="updateState">
+		update question set stCode = #{param1}, emCode = #{param2} where qCode = #{param3}
+	</update>
+	
+	<update id="changePw">
+		update signUpAdmin set emPw = #{param1} where emName = #{param2} and emNum = #{param3}
+	</update>
+
+
+</mapper>
